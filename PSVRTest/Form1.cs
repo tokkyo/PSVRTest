@@ -169,9 +169,9 @@ namespace PSVRTest
             str += string.Format("Motion Y: {0}\r\n", state.sensor.MotionY);
             str += string.Format("Motion Z: {0}\r\n", state.sensor.MotionZ);
 
-            str += string.Format("Gylo Yaw: {0}\r\n", state.sensor.GyloYaw);
-            str += string.Format("Gylo Pitch: {0}\r\n", state.sensor.GyloPitch);
-            str += string.Format("Gylo Roll: {0}\r\n", state.sensor.GyloRoll);
+            str += string.Format("Gyro Yaw: {0}\r\n", state.sensor.GyroYaw);
+            str += string.Format("Gyro Pitch: {0}\r\n", state.sensor.GyroPitch);
+            str += string.Format("Gyro Roll: {0}\r\n", state.sensor.GyroRoll);
             */
             trackBar1.Value = state.sensor.A;
             trackBar2.Value = state.sensor.B;
@@ -230,16 +230,16 @@ namespace PSVRTest
             str += string.Format("Motion Y: {0}\r\n", state.sensor.MotionY);
             str += string.Format("Motion Z: {0}\r\n", state.sensor.MotionZ);
 
-            str += string.Format("Gylo Yaw: {0}\r\n", state.sensor.GyloYaw);
-            str += string.Format("Gylo Pitch: {0}\r\n", state.sensor.GyloPitch);
-            str += string.Format("Gylo Roll: {0}\r\n", state.sensor.GyloRoll);
+            str += string.Format("Gyro Yaw: {0}\r\n", state.sensor.GyroYaw);
+            str += string.Format("Gyro Pitch: {0}\r\n", state.sensor.GyroPitch);
+            str += string.Format("Gyro Roll: {0}\r\n", state.sensor.GyroRoll);
 
             trackBar1.Value = state.sensor.MotionX;
             trackBar2.Value = state.sensor.MotionY;
             trackBar3.Value = state.sensor.MotionZ;
-            trackBar4.Value = state.sensor.GyloYaw;
-            trackBar5.Value = state.sensor.GyloPitch;
-            trackBar6.Value = state.sensor.GyloRoll;
+            trackBar4.Value = state.sensor.GyroYaw;
+            trackBar5.Value = state.sensor.GyroPitch;
+            trackBar6.Value = state.sensor.GyroRoll;
 
 
 

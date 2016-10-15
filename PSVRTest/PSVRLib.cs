@@ -10,9 +10,9 @@ namespace PSVRLib
         public int MotionY;
         public int MotionZ;
 
-        public int GyloYaw;
-        public int GyloPitch;
-        public int GyloRoll;
+        public int GyroYaw;
+        public int GyroPitch;
+        public int GyroRoll;
 
         //DEBUG
         public int A;
@@ -62,9 +62,9 @@ namespace PSVRLib
             //sensor.MotionZ = convert(data[29], data[30]);
 
 
-            //sensor.GyloRoll = -convert(data[19], data[20]);
-            //sensor.GyloYaw =   convert(data[21], data[22]);
-            //sensor.GyloPitch = convert(data[23], data[24]);
+            //sensor.GyroRoll = -convert(data[19], data[20]);
+            //sensor.GyroYaw =   convert(data[21], data[22]);
+            //sensor.GyroPitch = convert(data[23], data[24]);
 
             /*
              * sample data
