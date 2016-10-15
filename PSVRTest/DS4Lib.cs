@@ -27,9 +27,9 @@ namespace DS4Lib
         public int MotionY;
         public int MotionZ;
 
-        public int GyloYaw;
-        public int GyloPitch;
-        public int GyloRoll;
+        public int GyroYaw;
+        public int GyroPitch;
+        public int GyroRoll;
 
     }
 
@@ -200,9 +200,9 @@ namespace DS4Lib
             sensor.MotionX = convert(data[13], data[14]);
             sensor.MotionY = convert(data[15], data[16]);
             sensor.MotionZ = convert(data[17], data[18]);
-            sensor.GyloRoll = -convert(data[19], data[20]);
-            sensor.GyloYaw = convert(data[21], data[22]);
-            sensor.GyloPitch = convert(data[23], data[24]);
+            sensor.GyroRoll = -convert(data[19], data[20]);
+            sensor.GyroYaw = convert(data[21], data[22]);
+            sensor.GyroPitch = convert(data[23], data[24]);
             return sensor;
 
         }
