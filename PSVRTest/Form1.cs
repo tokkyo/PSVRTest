@@ -10,7 +10,9 @@ namespace PSVRTest
 {
     public partial class Form1 : Form
     {
-        PSVRState currentState;
+        PSVRState currentPSVR;
+        DS4State currentDS4;
+        private static bool ds4Mode = false;
         public Form1()
         {
             InitializeComponent();
@@ -26,25 +28,30 @@ namespace PSVRTest
             UnregisterRawInputDevices();
         }
 
-        private void RegisterRawInputDevices() {
+        private void RegisterRawInputDevices()
+        {
 
             int count = 1;
             int size = Marshal.SizeOf(typeof(RawInput.RAWINPUTDEVICE));
 
             RawInput.RAWINPUTDEVICE[] devices = new RawInput.RAWINPUTDEVICE[count];
 
-            //for DS4
-            //devices[0].usUsagePage = 1;
-            //devices[0].usUsage = 5;//Game Pad
-            //devices[0].hwndTarget = this.Handle;
-            //devices[0].dwFlags = (int)RawInput.RIDEV.INPUTSINK;
-
-            //PSVR
-            devices[0].usUsagePage = 0xFF01;
-            devices[0].usUsage = 0x01;//VS
-            devices[0].hwndTarget = this.Handle;
-            devices[0].dwFlags = (int)RawInput.RIDEV.INPUTSINK;
-
+            if (ds4Mode)
+            {
+                // for DS4
+                devices[0].usUsagePage = 1;
+                devices[0].usUsage = 5;//Game Pad
+                devices[0].hwndTarget = this.Handle;
+                devices[0].dwFlags = (int)RawInput.RIDEV.INPUTSINK;
+            }
+            else
+            {
+                // for PSVR
+                devices[0].usUsagePage = 0xFF01;
+                devices[0].usUsage = 0x01;//VS
+                devices[0].hwndTarget = this.Handle;
+                devices[0].dwFlags = (int)RawInput.RIDEV.INPUTSINK;
+            }
             /*
                 raw_input_device [0].usUsagePage = 0x0D; 
                 // RIDEV_PAGEONLY specifies all devices whose top level collection is from the specified usUsagePage.
@@ -65,9 +72,21 @@ namespace PSVRTest
 
             RawInput.RAWINPUTDEVICE[] devices = new RawInput.RAWINPUTDEVICE[1];
 
-            devices[0].usUsagePage = 0xFF01; //Generic Desktop
-            devices[0].usUsage = 0x01;//VS
-            devices[0].dwFlags = (int)RawInput.RIDEV.REMOVE;
+
+            if (ds4Mode)
+            {
+                // for DS4
+                devices[0].usUsagePage = 1;
+                devices[0].usUsage = 5;//Game Pad
+                devices[0].dwFlags = (int)RawInput.RIDEV.REMOVE;
+            }
+            else
+            {
+                // for PSVR
+                devices[0].usUsagePage = 0xFF01; //Generic Desktop
+                devices[0].usUsage = 0x01;//VS
+                devices[0].dwFlags = (int)RawInput.RIDEV.REMOVE;
+            }
             RawInput.RegisterRawInputDevices(devices, (uint)devices.Length, (uint)size);
         }
 
@@ -87,7 +106,9 @@ namespace PSVRTest
                   RawInput.GetRawInputData(m.LParam, (uint)RawInput.RID.INPUT, buffer, ref dwSize,
                                            (uint)Marshal.SizeOf(typeof(RawInput.RAWINPUTHEADER))) != dwSize)
                     return;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
             }
             RawInput.RAWINPUT raw = (RawInput.RAWINPUT)Marshal.PtrToStructure(buffer, typeof(RawInput.RAWINPUT));
 
@@ -95,7 +116,8 @@ namespace PSVRTest
             byte[] bRawData;
             byte[] newArray;
             string RawCode;
-            switch (raw.header.dwType) {
+            switch (raw.header.dwType)
+            {
                 case (int)RawInput.RawInputType.HID:
                     RawInput.RAWHID hid = raw.hid;
                     offset = Marshal.SizeOf(typeof(RawInput.RAWINPUTHEADER)) + Marshal.SizeOf(typeof(RawInput.RAWHID));
@@ -109,16 +131,25 @@ namespace PSVRTest
                     RawCode = BitConverter.ToString(newArray);
 
 
-                    if (false) {
+                    if (false)
+                    {
                         //this blocks UI...
                         if (listBox1.Items.Count > 30) listBox1.Items.RemoveAt(30);
                         listBox1.Items.Insert(0, string.Format("{0}\r\n", RawCode));
-                    }else{
+                    }
+                    else
+                    {
                         Debug.WriteLine(RawCode);
                     }
-                    //DS4State state = DS4.parse(newArray);
-                    PSVRState state = PSVR.parse(newArray);
-                    currentState = state;
+                    //TODO: check VID/PID or HID Usage
+                    if (ds4Mode)
+                    {
+                        currentDS4 = DS4.parse(newArray);
+                    }
+                    else
+                    {
+                        currentPSVR = PSVR.parse(newArray);
+                    }
                     break;
                 case (int)RawInput.RawInputType.Mouse:
                     RawInput.RAWMOUSE mouse = raw.mouse;
@@ -153,7 +184,14 @@ namespace PSVRTest
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            showPSVRState(currentState);
+            if (ds4Mode)
+            {
+                showDS4State(currentDS4);
+            }
+            else
+            {
+                showPSVRState(currentPSVR);
+            }
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -164,15 +202,32 @@ namespace PSVRTest
         private void showPSVRState(PSVRState state)
         {
             string str = "";
-            /*
-            str += string.Format("Motion X: {0}\r\n", state.sensor.MotionX);
-            str += string.Format("Motion Y: {0}\r\n", state.sensor.MotionY);
-            str += string.Format("Motion Z: {0}\r\n", state.sensor.MotionZ);
 
-            str += string.Format("Gyro Yaw: {0}\r\n", state.sensor.GyroYaw);
-            str += string.Format("Gyro Pitch: {0}\r\n", state.sensor.GyroPitch);
-            str += string.Format("Gyro Roll: {0}\r\n", state.sensor.GyroRoll);
-            */
+            str += string.Format("Motion X1: {0,6}\r\n", state.sensor.MotionX1);
+            str += string.Format("Motion Y1: {0,6}\r\n", state.sensor.MotionY1);
+            str += string.Format("Motion Z1: {0,6}\r\n", state.sensor.MotionZ1);
+
+            str += string.Format("Motion X2: {0,6}\r\n", state.sensor.MotionX2);
+            str += string.Format("Motion Y2: {0,6}\r\n", state.sensor.MotionY2);
+            str += string.Format("Motion Z2: {0,6}\r\n", state.sensor.MotionZ2);
+
+
+            str += string.Format("Gyro Yaw1:    {0,6}\r\n", state.sensor.GyroYaw1);
+            str += string.Format("Gyro Pitch1:  {0,6}\r\n", state.sensor.GyroPitch1);
+            str += string.Format("Gyro Roll1:   {0,6}\r\n", state.sensor.GyroRoll1);
+
+            str += string.Format("Gyro Yaw2:    {0,6}\r\n", state.sensor.GyroYaw2);
+            str += string.Format("Gyro Pitch2:  {0,6}\r\n", state.sensor.GyroPitch2);
+            str += string.Format("Gyro Roll2:   {0,6}\r\n", state.sensor.GyroRoll2);
+
+
+            str += string.Format("Volume: {0}\r\n", state.sensor.volume);
+            str += string.Format("Worn: {0}\r\n", state.sensor.isWorn);
+            str += string.Format("Display: {0}\r\n", state.sensor.isDisplayActive);
+            str += string.Format("Mute: {0}\r\n", state.sensor.isMute);
+            str += string.Format("Earphone: {0}\r\n", state.sensor.isEarphoneConnected);
+
+
             trackBar1.Value = state.sensor.A;
             trackBar2.Value = state.sensor.B;
             trackBar3.Value = state.sensor.C;
@@ -185,19 +240,27 @@ namespace PSVRTest
             //trackBar8.Value = state.sensor.H;
             trackBar9.Value = state.sensor.I;
 
-            trackBar12.Value = state.sensor.J;
+            trackBar10.Value = state.sensor.J;
             trackBar11.Value = state.sensor.K;
-            trackBar10.Value = state.sensor.L;
+            trackBar12.Value = state.sensor.L;
 
             trackBar13.Value = state.sensor.M;
             trackBar14.Value = state.sensor.N;
             trackBar15.Value = state.sensor.O;
 
 
+            //trackBar16.Value = state.sensor.MotionX1 - state.sensor.MotionX2;
+            //trackBar17.Value = state.sensor.MotionY1 - state.sensor.MotionY2;
+            //trackBar18.Value = state.sensor.MotionZ1 - state.sensor.MotionZ2;
+
+            trackBar16.Value = state.sensor.GyroYaw1 - state.sensor.GyroYaw2;
+            trackBar17.Value = state.sensor.GyroPitch1 - state.sensor.GyroPitch2;
+            trackBar18.Value = state.sensor.GyroRoll1 - state.sensor.GyroRoll2;
             stateTextBox.Text = str;
         }
 
-        private void showDS4State(DS4State state) {
+        private void showDS4State(DS4State state)
+        {
             string str = "";
 
             str += string.Format("DPad Up: {0}\r\n", state.buttons.DPadUp);
@@ -234,9 +297,9 @@ namespace PSVRTest
             str += string.Format("Gyro Pitch: {0}\r\n", state.sensor.GyroPitch);
             str += string.Format("Gyro Roll: {0}\r\n", state.sensor.GyroRoll);
 
-            trackBar1.Value = state.sensor.MotionX;
-            trackBar2.Value = state.sensor.MotionY;
-            trackBar3.Value = state.sensor.MotionZ;
+            trackBar1.Value = state.sensor.MotionX;//左方向+ (横方向にX軸)
+            trackBar2.Value = state.sensor.MotionY;//下方向+ (縦方向にY軸)
+            trackBar3.Value = state.sensor.MotionZ;//前方向+ (前後方向にZ軸)
             trackBar4.Value = state.sensor.GyroYaw;
             trackBar5.Value = state.sensor.GyroPitch;
             trackBar6.Value = state.sensor.GyroRoll;
@@ -254,9 +317,10 @@ namespace PSVRTest
                 str += string.Format("Touch1 X: {0}\r\n", state.touchPad.Touch1.X);
                 str += string.Format("Touch1 Y: {0}\r\n", state.touchPad.Touch1.Y);
             }
-            else {
+            else
+            {
                 str += string.Format("Touch1 X: {0}\r\n", "not detected");
-                str += string.Format("Touch1 Y: {0}\r\n", "not detected");            
+                str += string.Format("Touch1 Y: {0}\r\n", "not detected");
             }
 
             if (state.touchPad.Touch2.isActive)
@@ -268,7 +332,7 @@ namespace PSVRTest
             {
                 str += string.Format("Touch2 X: {0}\r\n", "not detected");
                 str += string.Format("Touch2 Y: {0}\r\n", "not detected");
-            }            
+            }
 
             stateTextBox.Text = str;
         }
